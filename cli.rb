@@ -1,57 +1,43 @@
-require 'optparse'
-require_relative 'api'
+# frozen_string_literal: true
 
-parser = OptionParser.new do |opts|
-  opts.banner = "Usage: ruby cli.rb [command] [arguments]"
-  opts.separator ""
-  opts.separator "Commands:"
-  opts.separator "  search <keyword>   Search for gems by name or info"
-  opts.separator "  show <gem_name>    Show details of a specific gem"
-  opts.separator ""
-  opts.separator "Options:"
-  
-  opts.on("-h", "--help", "Prints this help menu") do
-    puts opts
-    exit(0)
+require_relative './lib/api'
+require_relative './lib/printer'
+
+class CLI
+  def self.run(args)
+    command = args.shift
+    argument = args.shift
+
+    if command.nil?
+      Printer.print_error('No command provided.')
+      exit(1)
+    elsif command == 'show'
+      handle_show_command(argument)
+    else
+      Printer.print_error("Unknown command '#{command}'.")
+      exit(1)
+    end
+  end
+
+  def self.handle_show_command(gem_name)
+    if gem_name.nil?
+      Printer.print_error('Gem name required.')
+      exit(1)
+    end
+
+    gem_data = Api.fetch_gem(gem_name)
+
+    if gem_data.nil?
+      Printer.print_error("Gem '#{gem_name}' not found.")
+      exit(1)
+    else
+      Printer.print_gem_info(gem_data)
+      exit(0)
+    end
   end
 end
 
-begin
-  parser.parse!
-rescue OptionParser::InvalidOption => e
-  puts "Error: #{e.message}"
-  puts parser
-  exit(1)
-end
-
-command = ARGV.shift 
-argument = ARGV.shift
-
-if command.nil?
-  puts "Error: No command provided.\n\n"
-  puts parser
-  exit(1)
-end
-
-case command
-when 'search'
-  if argument.nil?
-    puts "Error: Keyword required. Usage: ruby cli.rb search <keyword>"
-    exit(1)
-  end
-  search_gems(argument)
-  exit(0)
-
-when 'show'
-  if argument.nil?
-    puts "Error: Gem name required. Usage: ruby cli.rb show <gem_name>"
-    exit(1)
-  end
-  show_gem(argument)
-  exit(0)
-
-else
-  puts "Error: Unknown command '#{command}'.\n\n"
-  puts parser
-  exit(1)
+if __FILE__ == $0
+  success = CLI.run(ARGV)
+  exit(success ? 0 : 1)
 end
