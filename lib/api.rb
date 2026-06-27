@@ -25,7 +25,7 @@ class Api
       @connection ||= Faraday.new(url: BASE_URL) do |conn|
         api_key = ENV['RUBYGEMS_API_KEY']
 
-        conn.headers['Authorization'] = api_key if api_key && !api_key.empty?
+        conn.headers['Authorization'] = api_key if api_key
         conn.adapter Faraday.default_adapter
       end
     end

@@ -13,10 +13,10 @@ RSpec.describe Printer do
     end
   end
 
-  describe '.print_error' do
+  describe '.error' do
     it 'formats and outputs error messages correctly to stdout' do
       expected_output = /Error: Something went wrong\n-{120}\n/
-      expect { Printer.print_error('Something went wrong') }
+      expect { Printer.error('Something went wrong') }
         .to output(expected_output).to_stdout
     end
   end

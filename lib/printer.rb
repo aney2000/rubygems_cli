@@ -7,8 +7,12 @@ class Printer
     puts "-" * 120
   end
 
-  def self.print_error(message)
+  def self.error(message)
     puts "Error: #{message}"
     puts "-" * 120
+  end
+
+  def self.info(message)
+    puts message
   end
 end
