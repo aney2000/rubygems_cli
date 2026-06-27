@@ -4,41 +4,45 @@ require_relative '../cli'
 require 'faraday'
 
 RSpec.describe 'CLI Application' do
-  it "displays 'Unknown command' for 'search' and returns false" do
-    expect { 
-      result = CLI.run(['search']) 
-      expect(result).to be false
-    }.to output(/Error: Unknown command 'search'/).to_stdout
+  before do
+    allow(CLI).to receive(:exit).and_raise(SystemExit)
   end
 
-  it "displays 'Gem name required.' when show has no arguments and returns false" do
-    expect { 
-      result = CLI.run(['show']) 
-      expect(result).to be false
-    }.to output(/Error: Gem name required/).to_stdout
+  it "displays 'Search keyword required.' for 'search' and exits" do
+    expect do
+      expect { CLI.run(['search']) }.to raise_error(SystemExit)
+    end.to output(/Error: Search keyword required\./).to_stdout
   end
 
-  it "mocks API response, prints details, and returns true on success" do
-    mock_json = { 'name' => 'faraday', 'info' => 'HTTP/REST API client library.' }.to_json
-    
-    allow(Faraday).to receive(:get).and_return(
-      instance_double(Faraday::Response, status: 200, body: mock_json)
-    )
-
-    expect { 
-      result = CLI.run(['show', 'faraday']) 
-      expect(result).to be true
-    }.to output(/GEM: faraday\nInfo: HTTP\/REST API client library\./).to_stdout
+  it "displays 'Gem name required.' when show has no arguments and exits" do
+    expect do
+      expect { CLI.run(['show']) }.to raise_error(SystemExit)
+    end.to output(/Error: Gem name required/).to_stdout
   end
 
-  it "displays error and returns false when the gem is not found (404)" do
-    allow(Faraday).to receive(:get).and_return(
-      instance_double(Faraday::Response, status: 404, body: '')
-    )
+  it 'prints gem details and exits successfully for show' do
+    allow(Api).to receive(:fetch_gem).and_return({ 'name' => 'faraday', 'info' => 'HTTP/REST API client library.' })
 
-    expect { 
-      result = CLI.run(['show', 'invalid_gem']) 
-      expect(result).to be false
-    }.to output(/Error: Gem 'invalid_gem' not found/).to_stdout
+    expect do
+      expect { CLI.run(%w[show faraday]) }.to raise_error(SystemExit)
+    end.to output(%r{GEM: faraday\nInfo: HTTP/REST API client library\.}).to_stdout
+  end
+
+  it 'displays an error and exits when the gem is not found' do
+    allow(Api).to receive(:fetch_gem).and_return(nil)
+
+    expect do
+      expect { CLI.run(%w[show invalid_gem]) }.to raise_error(SystemExit)
+    end.to output(/Error: Gem 'invalid_gem' not found/).to_stdout
+  end
+
+  it 'prints search results from the API when the cache is empty' do
+    allow(Cache).to receive(:read).and_return(nil)
+    allow(Api).to receive(:search_gems).and_return([{ 'name' => 'rails', 'info' => 'Web framework' }])
+    allow(Cache).to receive(:write)
+
+    expect do
+      expect { CLI.run(%w[search rails]) }.to raise_error(SystemExit)
+    end.to output(/GEM: rails\nInfo: Web framework/).to_stdout
   end
 end
