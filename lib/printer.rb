@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 class Printer
-  private
   def self.gem_info(gem_data)
     puts "GEM: #{gem_data['name']}"
     puts "Info: #{gem_data['info']}"

@@ -56,4 +56,5 @@ build-iPhoneSimulator/
 # .rubocop-https?--*
 
 .env
-cache_store/* 
+cache_store/*
+.idea
