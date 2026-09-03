@@ -54,7 +54,7 @@ RSpec.describe 'CLI Application' do
 
     expect do
       expect { CLI.run(%w[show faraday]) }.to raise_error(SystemExit)
-    end.to output(%r{GEM: faraday\nInfo: cached info}).to_stdout
+    end.to output(/GEM: faraday\nInfo: cached info/).to_stdout
 
     expect(Api).not_to have_received(:fetch_gem)
     expect(CLI).to have_received(:exit).with(0)
@@ -140,5 +140,33 @@ RSpec.describe 'CLI Application' do
     end.to output(/Error: Unexpected error: upstream failure/).to_stdout
 
     expect(CLI).to have_received(:exit).with(1)
+  end
+
+  it 'displays an error and exits when no command is provided' do
+    expect do
+      expect { CLI.run([]) }.to raise_error(SystemExit)
+    end.to output(/Error: No command provided\./).to_stdout
+
+    expect(CLI).to have_received(:exit).with(1)
+  end
+
+  it 'displays an error and exits for an unknown command' do
+    expect do
+      expect { CLI.run(%w[frobnicate]) }.to raise_error(SystemExit)
+    end.to output(/Error: Unknown command 'frobnicate'\./).to_stdout
+
+    expect(CLI).to have_received(:exit).with(1)
+  end
+
+  it 'informs the user when no gems match the search criteria' do
+    allow(Cache).to receive(:read).with('search:nonexistent').and_return(nil)
+    allow(Cache).to receive(:write)
+    allow(Api).to receive(:search_gems).and_return([])
+
+    expect do
+      expect { CLI.run(%w[search nonexistent]) }.to raise_error(SystemExit)
+    end.to output(/No gems found matching the criteria\./).to_stdout
+
+    expect(CLI).to have_received(:exit).with(0)
   end
 end
