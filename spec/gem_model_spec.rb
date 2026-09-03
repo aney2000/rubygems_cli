@@ -32,4 +32,18 @@ RSpec.describe GemModel do
       expect(gem_model.matches_name?('rails')).to be(false)
     end
   end
+
+  describe '#matches_keyword?' do
+    it 'returns true when keyword appears in gem info' do
+      gem_model = GemModel.new({ 'name' => 'http-client', 'info' => 'Rails connector' })
+
+      expect(gem_model.matches_keyword?('rails')).to be(true)
+    end
+
+    it 'returns false when keyword is in neither name nor info' do
+      gem_model = GemModel.new({ 'name' => 'http-client', 'info' => 'REST helper' })
+
+      expect(gem_model.matches_keyword?('rails')).to be(false)
+    end
+  end
 end
