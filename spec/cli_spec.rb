@@ -119,4 +119,26 @@ RSpec.describe 'CLI Application' do
 
     expect(CLI).to have_received(:exit).with(1)
   end
+
+  it 'returns a controlled error when search API fails unexpectedly' do
+    allow(Cache).to receive(:read).with('search:rails').and_return(nil)
+    allow(Api).to receive(:search_gems).and_raise(StandardError, 'network timeout')
+
+    expect do
+      expect { CLI.run(%w[search rails]) }.to raise_error(SystemExit)
+    end.to output(/Error: Unexpected error: network timeout/).to_stdout
+
+    expect(CLI).to have_received(:exit).with(1)
+  end
+
+  it 'returns a controlled error when show API fails unexpectedly' do
+    allow(Cache).to receive(:read).with('gem:rails').and_return(nil)
+    allow(Api).to receive(:fetch_gem).and_raise(StandardError, 'upstream failure')
+
+    expect do
+      expect { CLI.run(%w[show rails]) }.to raise_error(SystemExit)
+    end.to output(/Error: Unexpected error: upstream failure/).to_stdout
+
+    expect(CLI).to have_received(:exit).with(1)
+  end
 end

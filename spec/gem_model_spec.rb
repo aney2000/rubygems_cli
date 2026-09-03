@@ -3,6 +3,10 @@
 require_relative '../lib/gem_model'
 
 RSpec.describe GemModel do
+  it 'is an alias of RubygemsCli::Gem for backward compatibility' do
+    expect(GemModel).to eq(RubygemsCli::Gem)
+  end
+
   describe '.build_collection' do
     it 'builds a collection of GemModel instances from hashes' do
       gems = GemModel.build_collection([

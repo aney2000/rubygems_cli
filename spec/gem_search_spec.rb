@@ -1,11 +1,11 @@
 # frozen_string_literal: true
 
 require_relative '../lib/gem_search'
-require_relative '../lib/gem_model'
+require_relative '../lib/gem'
 
 RSpec.describe GemSearch do
   it 'keeps name matches before info-only matches' do
-    gems = GemModel.build_collection([
+    gems = RubygemsCli::Gem.build_collection([
                                        { 'name' => 'rails-admin', 'info' => 'dashboard', 'downloads' => 1, 'licenses' => ['MIT'] },
                                        { 'name' => 'admin-kit', 'info' => 'works with rails', 'downloads' => 100, 'licenses' => ['MIT'] }
                                      ])
@@ -16,7 +16,7 @@ RSpec.describe GemSearch do
   end
 
   it 'applies license filter and downloads sorting together' do
-    gems = GemModel.build_collection([
+    gems = RubygemsCli::Gem.build_collection([
                                        { 'name' => 'rails-a', 'info' => '', 'downloads' => 1, 'licenses' => ['MIT'] },
                                        { 'name' => 'rails-b', 'info' => '', 'downloads' => 5, 'licenses' => ['MIT'] },
                                        { 'name' => 'rails-c', 'info' => '', 'downloads' => 9, 'licenses' => ['Apache-2.0'] }
