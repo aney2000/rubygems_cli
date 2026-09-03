@@ -1,0 +1,8 @@
+# Enforce consistent LF line endings across the repository.
+* text=auto eol=lf
+
+# Ruby sources and configuration are always LF.
+*.rb text eol=lf
+*.yml text eol=lf
+Gemfile text eol=lf
+Gemfile.lock text eol=lf
