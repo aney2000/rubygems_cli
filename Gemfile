@@ -6,3 +6,4 @@ gem 'faraday'
 gem 'rspec', '>= 3.13.2'
 gem 'rubocop'
 gem 'rubocop-rspec', require: false
+gem 'simplecov', require: false
