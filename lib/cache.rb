@@ -4,7 +4,6 @@ require 'json'
 require 'fileutils'
 
 class Cache
-  private
   CACHE_DIR = 'cache_store'
   TWO_DAYS_IN_SECONDS = 2 * 24 * 60 * 60
 
@@ -18,14 +17,20 @@ class Cache
     end
 
     JSON.parse(File.read(file_path))
-  rescue StandardError
+  rescue StandardError => e
+    # Gracefully handle corrupted cache files or permission issues
+    # Log and return nil to fallback to API
+    warn("Cache read error for #{query}: #{e.message}")
     nil
   end
 
   def self.write(query, data)
     FileUtils.mkdir_p(CACHE_DIR)
     File.write(path_for(query), JSON.generate(data))
-  rescue StandardError
+  rescue StandardError => e
+    # Gracefully handle permission issues or full disk scenarios
+    # Proceed without cache rather than crashing the application
+    warn("Cache write error for #{query}: #{e.message}")
   end
 
   def self.path_for(query)
