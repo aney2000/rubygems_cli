@@ -3,12 +3,13 @@
 require_relative '../lib/search_gems_service'
 
 RSpec.describe SearchGemsService do
-  let(:api) { class_double('Api') }
-  let(:cache) { class_double('Cache') }
+  let(:api) { class_double(Api) }
+  let(:cache) { class_double(Cache) }
   let(:service) { described_class.new(api: api, cache: cache) }
 
   it 'returns cached search results when present' do
     allow(cache).to receive(:read).with('search:rails').and_return([{ 'name' => 'rails' }])
+    allow(api).to receive(:search_gems).and_return([])
 
     result = service.call('rails')
 

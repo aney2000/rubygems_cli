@@ -3,12 +3,13 @@
 require_relative '../lib/show_gem_service'
 
 RSpec.describe ShowGemService do
-  let(:api) { class_double('Api') }
-  let(:cache) { class_double('Cache') }
+  let(:api) { class_double(Api) }
+  let(:cache) { class_double(Cache) }
   let(:service) { described_class.new(api: api, cache: cache) }
 
   it 'returns cached gem details when present' do
     allow(cache).to receive(:read).with('gem:rails').and_return({ 'name' => 'rails' })
+    allow(api).to receive(:fetch_gem).and_return({})
 
     result = service.call('rails')
 
