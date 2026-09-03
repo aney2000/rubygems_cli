@@ -11,6 +11,11 @@ class GemModel
     @name.downcase.include?(keyword.downcase)
   end
 
+  def matches_keyword?(keyword)
+    normalized = keyword.downcase
+    @name.downcase.include?(normalized) || @info.downcase.include?(normalized)
+  end
+
   private
   def initialize(data)
     @name = data['name']
