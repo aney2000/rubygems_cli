@@ -4,12 +4,11 @@ require 'faraday'
 require 'json'
 
 class Api
-  private
   BASE_URL = 'https://rubygems.org/api/v1'
 
   def self.connection
     @connection ||= Faraday.new(url: BASE_URL) do |conn|
-      api_key = ENV['RUBYGEMS_API_KEY']
+      api_key = ENV.fetch('RUBYGEMS_API_KEY', nil)
 
       conn.headers['Authorization'] = api_key if api_key && !api_key.empty?
       conn.adapter Faraday.default_adapter

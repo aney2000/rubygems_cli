@@ -1,13 +1,13 @@
 # frozen_string_literal: true
 
-require_relative './lib/api'
-require_relative './lib/printer'
-require_relative './lib/gem'
-require_relative './lib/cache'
-require_relative './lib/search_options'
-require_relative './lib/search_gems_service'
-require_relative './lib/show_gem_service'
-require_relative './lib/gem_search'
+require_relative 'lib/api'
+require_relative 'lib/printer'
+require_relative 'lib/gem'
+require_relative 'lib/cache'
+require_relative 'lib/search_options'
+require_relative 'lib/search_gems_service'
+require_relative 'lib/show_gem_service'
+require_relative 'lib/gem_search'
 
 class CLI
   def self.run(args)
