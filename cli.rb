@@ -4,6 +4,10 @@ require_relative './lib/api'
 require_relative './lib/printer'
 require_relative './lib/gem_model'
 require_relative './lib/cache'
+require_relative './lib/search_options'
+require_relative './lib/search_gems_service'
+require_relative './lib/show_gem_service'
+require_relative './lib/gem_search'
 
 class CLI
   def self.run(args)
@@ -29,7 +33,7 @@ class CLI
       exit(1)
     end
 
-    gem_data = Api.fetch_gem(gem_name)
+    gem_data = ShowGemService.new(api: Api, cache: Cache).call(gem_name)
 
     if gem_data.nil?
       Printer.print_error("Gem '#{gem_name}' not found.")
@@ -41,37 +45,22 @@ class CLI
   end
 
   def self.handle_search_command(args)
-    query = args.shift
-    if query.nil?
-      Printer.print_error('Search keyword required.')
+    parsed_options = SearchOptions.parse(args)
+
+    unless parsed_options.error.nil?
+      Printer.print_error(parsed_options.error)
       exit(1)
     end
 
-    options = {}
-    while (arg = args.shift)
-      if arg == '--most-downloads-first'
-        options[:most_downloads] = true
-      elsif arg == '--license'
-        options[:license] = args.shift
-      end
-    end
-
-    raw_results = Cache.read(query)
-
-    if raw_results.nil?
-      raw_results = Api.search_gems(query)
-      Cache.write(query, raw_results) unless raw_results.empty?
-    end
-
+    raw_results = SearchGemsService.new(api: Api, cache: Cache).call(parsed_options.query)
     gems = GemModel.build_collection(raw_results)
 
-    gems = gems.sort_by { |gem| gem.matches_name?(query) ? 0 : 1 }
-
-    gems = gems.select { |gem| gem.licenses.include?(options[:license]) } if options[:license]
-
-    if options[:most_downloads]
-      gems = gems.sort_by { |gem| [gem.matches_name?(query) ? 0 : 1, -gem.downloads] }
-    end
+    gems = GemSearch.new(
+      gems,
+      query: parsed_options.query,
+      license: parsed_options.license,
+      most_downloads_first: parsed_options.most_downloads_first
+    ).results
 
     if gems.empty?
       puts 'No gems found matching the criteria.'
