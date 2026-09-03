@@ -8,7 +8,7 @@ RSpec.describe Printer do
       fake_gem_data = { 'name' => 'test_gem', 'info' => 'A nice gem description.' }
       expected_output = /GEM: test_gem\nInfo: A nice gem description\.\n-{120}\n/
 
-      expect { Printer.gem_info(fake_gem_data) }
+      expect { described_class.gem_info(fake_gem_data) }
         .to output(expected_output).to_stdout
     end
   end
@@ -16,7 +16,7 @@ RSpec.describe Printer do
   describe '.print_error' do
     it 'formats and outputs error messages correctly to stdout' do
       expected_output = /Error: Something went wrong\n-{120}\n/
-      expect { Printer.print_error('Something went wrong') }
+      expect { described_class.print_error('Something went wrong') }
         .to output(expected_output).to_stdout
     end
   end

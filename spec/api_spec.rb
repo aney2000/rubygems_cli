@@ -6,17 +6,17 @@ require 'faraday'
 RSpec.describe Api do
   describe '.connection' do
     around do |example|
-      original_key = ENV['RUBYGEMS_API_KEY']
-      Api.instance_variable_set(:@connection, nil)
+      original_key = ENV.fetch('RUBYGEMS_API_KEY', nil)
+      described_class.instance_variable_set(:@connection, nil)
       example.run
       ENV['RUBYGEMS_API_KEY'] = original_key
-      Api.instance_variable_set(:@connection, nil)
+      described_class.instance_variable_set(:@connection, nil)
     end
 
     it 'adds the Authorization header when an API key is present' do
       ENV['RUBYGEMS_API_KEY'] = 'secret-token'
 
-      connection = Api.connection
+      connection = described_class.connection
 
       expect(connection.headers['Authorization']).to eq('secret-token')
     end
@@ -24,7 +24,7 @@ RSpec.describe Api do
     it 'does not add the Authorization header when no API key is set' do
       ENV.delete('RUBYGEMS_API_KEY')
 
-      connection = Api.connection
+      connection = described_class.connection
 
       expect(connection.headers['Authorization']).to be_nil
     end
@@ -36,9 +36,9 @@ RSpec.describe Api do
                                                     body: { 'name' => 'rails', 'info' => 'Web framework' }.to_json)
       connection = instance_double(Faraday::Connection, get: response)
 
-      allow(Api).to receive(:connection).and_return(connection)
+      allow(described_class).to receive(:connection).and_return(connection)
 
-      result = Api.fetch_gem('rails')
+      result = described_class.fetch_gem('rails')
 
       expect(result).to eq({ 'name' => 'rails', 'info' => 'Web framework' })
       expect(connection).to have_received(:get).with('gems/rails.json')
@@ -48,9 +48,9 @@ RSpec.describe Api do
       response = instance_double(Faraday::Response, status: 404, body: '')
       connection = instance_double(Faraday::Connection, get: response)
 
-      allow(Api).to receive(:connection).and_return(connection)
+      allow(described_class).to receive(:connection).and_return(connection)
 
-      result = Api.fetch_gem('missing_gem')
+      result = described_class.fetch_gem('missing_gem')
 
       expect(result).to be_nil
       expect(connection).to have_received(:get).with('gems/missing_gem.json')
@@ -62,9 +62,9 @@ RSpec.describe Api do
       response = instance_double(Faraday::Response, status: 200, body: [{ 'name' => 'rails' }].to_json)
       connection = instance_double(Faraday::Connection, get: response)
 
-      allow(Api).to receive(:connection).and_return(connection)
+      allow(described_class).to receive(:connection).and_return(connection)
 
-      result = Api.search_gems('rails')
+      result = described_class.search_gems('rails')
 
       expect(result).to eq([{ 'name' => 'rails' }])
       expect(connection).to have_received(:get).with('search.json', { query: 'rails' })
@@ -74,9 +74,9 @@ RSpec.describe Api do
       response = instance_double(Faraday::Response, status: 500, body: '')
       connection = instance_double(Faraday::Connection, get: response)
 
-      allow(Api).to receive(:connection).and_return(connection)
+      allow(described_class).to receive(:connection).and_return(connection)
 
-      result = Api.search_gems('rails')
+      result = described_class.search_gems('rails')
 
       expect(result).to eq([])
       expect(connection).to have_received(:get).with('search.json', { query: 'rails' })
