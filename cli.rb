@@ -2,7 +2,7 @@
 
 require_relative './lib/api'
 require_relative './lib/printer'
-require_relative './lib/gem_model'
+require_relative './lib/gem'
 require_relative './lib/cache'
 require_relative './lib/search_options'
 require_relative './lib/search_gems_service'
@@ -15,9 +15,9 @@ class CLI
 
     case command
     when 'show'
-      handle_show_command(args.shift)
+      safely_run { handle_show_command(args.shift) }
     when 'search'
-      handle_search_command(args)
+      safely_run { handle_search_command(args) }
     when nil
       Printer.print_error('No command provided.')
       exit(1)
@@ -25,6 +25,13 @@ class CLI
       Printer.print_error("Unknown command '#{command}'.")
       exit(1)
     end
+  end
+
+  def self.safely_run
+    yield
+  rescue StandardError => e
+    Printer.print_error("Unexpected error: #{e.message}")
+    exit(1)
   end
 
   def self.handle_show_command(gem_name)
@@ -53,7 +60,7 @@ class CLI
     end
 
     raw_results = SearchGemsService.new(api: Api, cache: Cache).call(parsed_options.query)
-    gems = GemModel.build_collection(raw_results)
+    gems = RubygemsCli::Gem.build_collection(raw_results)
 
     gems = GemSearch.new(
       gems,

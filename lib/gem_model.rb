@@ -1,26 +1,6 @@
 # frozen_string_literal: true
 
-class GemModel
-  attr_reader :name, :info, :downloads, :licenses
+require_relative './gem'
 
-  def self.build_collection(array_of_hashes)
-    array_of_hashes.map { |data| new(data) }
-  end
-
-  def matches_name?(keyword)
-    @name.downcase.include?(keyword.downcase)
-  end
-
-  def matches_keyword?(keyword)
-    normalized = keyword.downcase
-    @name.downcase.include?(normalized) || @info.downcase.include?(normalized)
-  end
-
-  private
-  def initialize(data)
-    @name = data['name']
-    @info = data['info'] || ''
-    @downloads = data['downloads'] || 0
-    @licenses = data['licenses'] || []
-  end
-end
+# Compatibility alias for existing references while using a proper Gem class.
+GemModel = RubygemsCli::Gem
