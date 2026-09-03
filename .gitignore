@@ -11,7 +11,13 @@
 /tmp/
 
 # Used by dotenv library to load environment variables.
-# .env
+.env
+
+# Bundler local install path
+/vendor/bundle/
+
+# Local gem search cache
+/cache_store/
 
 # Ignore Byebug command history file.
 .byebug_history
